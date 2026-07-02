@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Simulación y Soluciones Financieras</title>
+    <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --primary-light: #3b82f6;
+            --background-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --success-color: #10b981;
+            --success-bg: #ecfdf5;
+            --success-border: #a7f3d0;
+            --danger-color: #ef4444;
+            --danger-bg: #fef2f2;
+            --danger-border: #fca5a5;
+            --warning-color: #f59e0b;
+            --warning-bg: #fffbeb;
+            --warning-border: #fef3c7;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .calculator-container, .info-sidebar {
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+        }
+
+        .header-section {
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-prefix {
+            position: absolute;
+            left: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem 0.75rem 0.75rem 28px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            box-sizing: border-box;
+            color: var(--text-main);
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        input[readonly] {
+            background-color: #f8fafc;
+            color: var(--primary-color);
+            font-weight: 600;
+            padding-left: 12px;
+            cursor: default;
+        }
+
+        .divider {
+            grid-column: 1 / -1;
+            border: 0;
+            border-top: 1px solid var(--border-color);
+            margin: 0.5rem 0;
+        }
+
+        .result-card {
+            background-color: #f1f5f9;
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .result-card span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .result-card strong {
+            font-size: 1.35rem;
+            color: var(--primary-color);
+            margin-top: 0.25rem;
+        }
+
+        .result-card.highlight {
+            grid-column: span 2;
+            background-color: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+
+        /* Paneles de Respuesta del Simulador */
+        .status-panel {
+            grid-column: span 2;
+            padding: 1.25rem;
+            border-radius: 10px;
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+            border: 1px solid transparent;
+        }
+
+        .status-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-message {
+            font-size: 0.875rem;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .status-approved {
+            display: block;
+            background-color: var(--success-bg);
+            border-color: var(--success-border);
+            color: #065f46;
+        }
+
+        .status-rejected {
+            display: block;
+            background-color: var(--danger-bg);
+            border-color: var(--danger-border);
+            color: #991b1b;
+        }
+
+        .suggestion-highlight {
+            font-weight: 700;
+            text-decoration: underline;
+        }
+
+        /* Sección Lateral de Gestión */
+        .sidebar-title {
+            color: var(--primary-color);
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .speech-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .speech-item {
+            position: relative;
+            padding-left: 1.75rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.92rem;
+            line-height: 1.5;
+            color: #334155;
+        }
+
+        .speech-item::before {
+            content: "•";
+            position: absolute;
+            left: 0.5rem;
+            color: var(--primary-light);
+            font-size: 1.5rem;
+            top: -0.2rem;
+        }
+
+        .speech-item strong {
+            color: var(--text-main);
+        }
+
+        /* Alerta de Validación de Supervisor */
+        .supervisor-alert {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            border-radius: 8px;
+            color: #92400e;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            animation: pulse-border 2s infinite ease-in-out;
+        }
+
+        .supervisor-alert-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .supervisor-alert-desc {
+            font-size: 0.85rem;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.2); border-color: var(--warning-border); }
+            50% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.1); border-color: #f59e0b; }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.2); border-color: var(--warning-border); }
+        }
+
+        @media (max-width: 900px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .input-group.full-width, .result-card.highlight, .status-panel {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-layout">
+    <div class="calculator-container">
+        <div class="header-section">
+            <h2>Simulador de Propuestas</h2>
+            <div class="subtitle">Evaluación analítica con umbral riguroso del 18%</div>
+        </div>
+        
+        <div class="grid">
+            <div class="input-group">
+                <label for="capital">Capital</label>
+                <div class="input-wrapper">
+                    <span class="input-prefix">S/</span>
+                    <input type="number" id="capital" placeholder="0.00" step="0.01" oninput="calcularPropuesta()">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="campana">Monto de Campaña</label>
+                <div class="input-wrapper">
+                    <span class="input-prefix">S/</span>
+                    <input type="number" id="campana" placeholder="0.00" step="0.01" oninput="calcularPropuesta()">
+                </div>
+            </div>
+
+            <div class="input-group full-width">
+                <label for="importePropuesto">Importe Propuesto por Cliente</label>
+                <div class="input-wrapper">
+                    <span class="input-prefix">S/</span>
+                    <input type="number" id="importePropuesto" placeholder="0.00" step="0.01" oninput="calcularPropuesta()">
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="result-card">
+                <span>Campaña %</span>
+                <input type="text" id="campanaPorcentaje" readonly value="0.00%">
+            </div>
+
+            <div class="result-card">
+                <span>% Capital Propuesto</span>
+                <input type="text" id="propuestoPorcentaje" readonly value="0.00%">
+            </div>
+
+            <div class="result-card highlight" id="diferenciaCard">
+                <span>Diferencia de Porcentajes</span>
+                <strong id="diferencia">0.00%</strong>
+            </div>
+
+            <div id="panelAprobado" class="status-panel status-approved">
+                <div class="status-title">✓ Propuesta Aprobada</div>
+                <p class="status-message">La diferencia se encuentra dentro del margen de tolerancia permitido (≤ 18.00%). Cumple la viabilidad inicial.</p>
+            </div>
+
+            <div id="panelRechazado" class="status-panel status-rejected">
+                <div class="status-title">✕ Propuesta Rechazada</div>
+                <p class="status-message" id="mensajeRechazo"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-sidebar">
+        <div class="sidebar-title">Guía de Gestión para el Asesor</div>
+        
+        <ul class="speech-list">
+            <li class="speech-item">
+                <strong>Efectividad de Pago:</strong> Recordarle firmemente al cliente que debe contar con el <strong>dinero a la mano</strong> al momento de formalizar el acuerdo de la solución financiera.
+            </li>
+            <li class="speech-item">
+                <strong>Consecuencias por Incumplimiento:</strong> Explicar con claridad que si no se cumple estrictamente con la fecha pactada del compromiso, se <strong>perderá de forma automática el descuento</strong> otorgado y se aplicará una <strong>penalidad</strong> incrementando el saldo de la deuda.
+            </li>
+        </ul>
+
+        <div class="supervisor-alert">
+            <div style="font-size: 1.5rem; line-height: 1;">⚠</div>
+            <div>
+                <div class="supervisor-alert-title">Validación Requerida</div>
+                <p class="supervisor-alert-desc">Antes de cerrar o registrar cualquier acuerdo con el cliente, el asesor debe <strong>esperar obligatoriamente que el supervisor indique que la propuesta ya está aprobada</strong> en el sistema.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function calcularPropuesta() {
+        const capital = parseFloat(document.getElementById('capital').value) || 0;
+        const campana = parseFloat(document.getElementById('campana').value) || 0;
+        const importePropuesto = parseFloat(document.getElementById('importePropuesto').value) || 0;
+
+        const campanaPctEl = document.getElementById('campanaPorcentaje');
+        const propuestoPctEl = document.getElementById('propuestoPorcentaje');
+        const diferenciaEl = document.getElementById('diferencia');
+        const diferenciaCard = document.getElementById('diferenciaCard');
+        
+        const panelAprobado = document.getElementById('panelAprobado');
+        const panelRechazado = document.getElementById('panelRechazado');
+        const mensajeRechazo = document.getElementById('mensajeRechazo');
+
+        if (capital > 0) {
+            // Lógica exacta del Excel
+            const campanaPct = (campana / capital) * 100;
+            const propuestoPct = (importePropuesto / capital) * 100;
+            const diferencia = campanaPct - propuestoPct;
+
+            campanaPctEl.value = campanaPct.toFixed(2) + '%';
+            propuestoPctEl.value = propuestoPct.toFixed(2) + '%';
+            diferenciaEl.innerText = diferencia.toFixed(2) + '%';
+
+            // Evaluación de Negocio con el nuevo límite estricto del 18%
+            if (diferencia <= 18) {
+                diferenciaCard.style.backgroundColor = '#f0fdf4';
+                diferenciaCard.style.borderColor = '#bbf7d0';
+                diferenciaEl.style.color = 'var(--success-color)';
+                
+                panelAprobado.style.display = 'block';
+                panelRechazado.style.display = 'none';
+            } else {
+                diferenciaCard.style.backgroundColor = '#fef2f2';
+                diferenciaCard.style.borderColor = '#fca5a5';
+                diferenciaEl.style.color = 'var(--danger-color)';
+                
+                // Cálculo preciso para el 18% como meta: (campana/capital)*100 - (monto_minimo/capital)*100 = 18
+                const montoMinimoSugerido = campana - (0.18 * capital);
+                
+                let sugerenciaTexto = `La diferencia supera el margen máximo permitido (> 18.00%). <br><strong>Sugerencia:</strong> Se debe aumentar el monto de pago.`;
+                if (montoMinimoSugerido > 0) {
+                    sugerenciaTexto += ` Para alcanzar el umbral de aprobación, oriente al cliente a ofrecer un monto mínimo estimado de <span class="suggestion-highlight">S/ ${montoMinimoSugerido.toFixed(2)}</span>.`;
+                }
+
+                mensajeRechazo.innerHTML = sugerenciaTexto;
+                
+                panelAprobado.style.display = 'none';
+                panelRechazado.style.display = 'block';
+            }
+        } else {
+            campanaPctEl.value = '0.00%';
+            propuestoPctEl.value = '0.00%';
+            diferenciaEl.innerText = '0.00%';
+            diferenciaEl.style.color = 'var(--primary-color)';
+            diferenciaCard.style.backgroundColor = '#f1f5f9';
+            diferenciaCard.style.borderColor = 'var(--border-color)';
+            
+            panelAprobado.style.display = 'none';
+            panelRechazado.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
